@@ -5,6 +5,11 @@ class Point:
     def __str__(self):
         return f"({self.x}, {self.y})"
 
+def find_hull(convex_hull, subset, pointP, pointQ):
+    if len(subset) == 0:
+        return
+    
+
 def quick_hull(points):
     if len(points) < 2:
         raise ValueError("Must contain at least 2 points")
