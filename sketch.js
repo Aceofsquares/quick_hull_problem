@@ -2,10 +2,13 @@ var points = [];
 var point_output;
 
 let default_number_of_points = 10;
+let display_point_chkbx;
+let point_outputarea;
+let point_inputarea;
+let canvas;
 
 const window_width_offset = 0;
-const window_height_offset = 200;
-let display_point_chkbx;
+const window_height_offset = 500;
 
 class Point{
     constructor(X, Y){
@@ -14,7 +17,7 @@ class Point{
     }
 
     to_string() {
-        return this.x + ", " + this.y;
+        return this.x + " " + this.y;
     }
 
     display() {
@@ -24,7 +27,7 @@ class Point{
     display_with_text(size){
         this.display();
         textSize(10);
-        text("(" + this.to_string() + ")", this.x+3, this.y-3);
+        text("(" + this.x + ", " + this.y + ")", this.x+3, this.y-3);
     }
 }
 
@@ -48,34 +51,16 @@ function generate_random_points(num_of_points){
     for(var p = 0; p < num_of_points; p++){
         var x = int(random(-width/4, width/4) + width/2);
         var y = int((random(-height/4, height/4) + height/2)-75);
-        points.push(new Point(x, y));
+        points.push( new Point(x, y));
     }
     draw_points(points);
     display_point(points, display_point_chkbx.checked());
-    point_output = createElement('div', convert_to_string(points));
-    point_output.html();
-    console.log(point_output);
 }
 
 function convert_to_string(array){
     let result = "";
-    array.forEach(p => result+=p.to_string()+"<br />");
+    array.forEach(p => result+=p.to_string()+"\n");
     return result;
-
-}
-
-function setup() {
-    createCanvas(windowWidth-window_width_offset, windowHeight-window_height_offset);
-
-    display_point_chkbx = createCheckbox('Show Point Numbers', true);
-    display_point_chkbx.changed(displayPointEvent);
-    
-    var button = createButton('Generate Points');
-    button.position(width/3, height-25);
-    button.mousePressed(generate_points_btnevent);
-
-    build_border();
-    generate_random_points(default_number_of_points);
 }
 
 function displayPointEvent(){
@@ -100,14 +85,50 @@ function display_point(points, display){
 
 function generate_points_btnevent() {
     background(255);
-    point_output.elt.innerHTML = "";
     points = [];
     build_border();
     generate_random_points(default_number_of_points);
+    update_point_area();
 }
 
 function windowResized() {
     resizeCanvas(windowWidth-window_width_offset, windowHeight-window_height_offset);
+}
+
+function update_point_area(){
+    point_outputarea.elt.value = convert_to_string(points);
+    point_outputarea.elt.readOnly = true;
+}
+
+function setup() {
+    canvas = createCanvas(windowWidth-window_width_offset, windowHeight-window_height_offset);
+    canvas.parent('main-canvas');
+
+    let generate_button = createButton('Generate Points').id("functional-button");
+    generate_button.parent('buttons');
+    generate_button.mousePressed(generate_points_btnevent);
+
+    let user_in_button = createButton('Use Own Points').id("functional-button");
+    user_in_button.parent('buttons');
+
+    let display_convex_hull_button = createButton('Display Convex Hull').id('functional-button');
+    display_convex_hull_button.parent('buttons');
+
+    display_point_chkbx = createCheckbox('Show Point Numbers', true);
+    display_point_chkbx.changed(displayPointEvent);
+    display_point_chkbx.parent('buttons');
+
+    createDiv("<p><b>Points Output</b></p>").parent('point-io').id('p-out').html();
+    point_outputarea = createElement('textarea');
+    point_outputarea.parent('p-out');
+
+    createDiv("<p><b>Points input</b></p>").parent('point-io').id('p-in').html();
+    point_inputarea = createElement('textarea');
+    point_inputarea.parent('p-in');
+
+    build_border();
+    generate_random_points(default_number_of_points);
+    update_point_area();
 }
 
 function draw() {
