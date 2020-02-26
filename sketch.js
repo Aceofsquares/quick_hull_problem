@@ -12,6 +12,20 @@ class Point{
         this.x = X;
         this.y = Y;
     }
+
+    to_string() {
+        return this.x + ", " + this.y;
+    }
+
+    display() {
+        point(this.x, this.y);
+    }
+
+    display_with_text(size){
+        this.display();
+        textSize(10);
+        text("(" + this.to_string() + ")", this.x+3, this.y-3);
+    }
 }
 
 function build_border(){
@@ -26,7 +40,7 @@ function build_border(){
 function draw_points(points){
     strokeWeight(4);
     points.forEach(p => {
-        point(p.x, p.y);
+        p.display();
     });
 }
 
@@ -45,7 +59,7 @@ function generate_random_points(num_of_points){
 
 function convert_to_string(array){
     let result = "";
-    array.forEach(p => result+=p.x+", "+p.y+"<br />");
+    array.forEach(p => result+=p.to_string()+"<br />");
     return result;
 
 }
@@ -55,6 +69,7 @@ function setup() {
 
     display_point_chkbx = createCheckbox('Show Point Numbers', true);
     display_point_chkbx.changed(displayPointEvent);
+    
     var button = createButton('Generate Points');
     button.position(width/3, height-25);
     button.mousePressed(generate_points_btnevent);
@@ -74,8 +89,7 @@ function displayPointEvent(){
 function display_point(points, display){
     if(display){
         points.forEach(p => {
-            textSize(10);
-            text(p.x + ", " + p.y, p.x+3, p.y-3);
+            p.display_with_text(10);
         });
     } else {
         background(255);
