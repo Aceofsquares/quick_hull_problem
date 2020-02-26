@@ -5,6 +5,14 @@ let default_number_of_points = 10;
 
 const window_width_offset = 0;
 const window_height_offset = 200;
+let display_point_chkbx;
+
+class Point{
+    constructor(X, Y){
+        this.x = X;
+        this.y = Y;
+    }
+}
 
 function build_border(){
     strokeWeight(1);
@@ -15,47 +23,73 @@ function build_border(){
     
 }
 
-function random_points(num_of_points){
+function draw_points(points){
+    strokeWeight(4);
+    points.forEach(p => {
+        point(p.x, p.y);
+    });
+}
+
+function generate_random_points(num_of_points){
     for(var p = 0; p < num_of_points; p++){
         var x = int(random(-width/4, width/4) + width/2);
         var y = int((random(-height/4, height/4) + height/2)-75);
-        strokeWeight(4);
-        point(x, y);
-        textSize(10);
-        text(x + ", " + y, x+3, y-3);
-        points.push([x, y]);
+        points.push(new Point(x, y));
     }
+    draw_points(points);
+    display_point(points, display_point_chkbx.checked());
     point_output = createElement('div', convert_to_string(points));
     point_output.html();
     console.log(point_output);
-    points = []
 }
 
 function convert_to_string(array){
     let result = "";
-    array.forEach(element => result+=element[0]+", "+element[1]+"<br />");
+    array.forEach(p => result+=p.x+", "+p.y+"<br />");
     return result;
 
 }
 
 function setup() {
     createCanvas(windowWidth-window_width_offset, windowHeight-window_height_offset);
-    build_border();
-    random_points(default_number_of_points);
+
+    display_point_chkbx = createCheckbox('Show Point Numbers', true);
+    display_point_chkbx.changed(displayPointEvent);
     var button = createButton('Generate Points');
     button.position(width/3, height-25);
-    button.mousePressed(generate_points);
+    button.mousePressed(generate_points_btnevent);
+
+    build_border();
+    generate_random_points(default_number_of_points);
 }
 
-function display_point(){
-    
+function displayPointEvent(){
+    if(display_point_chkbx.checked()){
+        display_point(points, true);
+    } else {
+        display_point(points, false);
+    }
 }
 
-function generate_points() {
+function display_point(points, display){
+    if(display){
+        points.forEach(p => {
+            textSize(10);
+            text(p.x + ", " + p.y, p.x+3, p.y-3);
+        });
+    } else {
+        background(255);
+        build_border();
+        draw_points(points);
+    }
+}
+
+function generate_points_btnevent() {
     background(255);
     point_output.elt.innerHTML = "";
+    points = [];
     build_border();
-    random_points(default_number_of_points);
+    generate_random_points(default_number_of_points);
 }
 
 function windowResized() {
