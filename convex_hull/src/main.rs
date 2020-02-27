@@ -1,42 +1,83 @@
-use std::fmt;
+use std::env;
+use std::fs::File;
+use std::io::{BufReader, BufRead, Error};
 
-#[derive(Debug)]
-struct Point{
-    x: i32,
-    y: i32,
+mod geometry;
+
+use geometry::{Point, Line};
+
+fn parse_file(f: &File) -> Vec<Point> {
+    let points: Vec<Point> = Vec::new();
+
+    let buffered = BufReader::new(f);
+
+    buffered.lines().map(
+        |line| {
+            let line = line.unwrap();
+            let split: Vec<&str> = line.split(" ").collect();
+            let x = split[0].parse::<f64>().unwrap();
+            let y = split[1].parse::<f64>().unwrap();
+            Point{x, y}
+        }
+    ).collect()
 }
 
-impl fmt::Display for Point {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {})", self.x, self.y)
+fn min_max_points_xdist(points: &Vec<Point>) -> (Option<Point>, Option<Point>) {
+    let mut min_point = &points[0];
+    let mut max_point = &points[0];
+
+    for point in points {
+        if point.x < min_point.x {
+            min_point = &point;
+        }
+
+        if point.x > max_point.x {
+            max_point = &point;
+        }
     }
+
+    (Some(*min_point), Some(*max_point))
 }
 
-#[derive(Debug)]
-struct Line {
-    m: f32,
-    b: f32,
+fn point_farthest_from_line(line: &Line, points: &Vec<Point>) -> Option<Point> {
+    let mut farthest_point = &points[0];
+    let mut current_max_distance = line.rel_pos_of_point(farthest_point).abs();
+    for point in points {
+        let point_dist = line.rel_pos_of_point(point).abs();
+        if point_dist > current_max_distance {
+            farthest_point = point;
+            current_max_distance = point_dist;
+        }
+    }
+
+    Some(*farthest_point)
 }
 
-enum PointLocation {
-    Above, Below, On 
+fn quickhull(points: &Vec<Point>) -> Option<&Vec<Point>> {
+    if points.len() < 2 {
+        return None;
+    } else if points.len() == 2{
+        return Some(points);
+    }
+    let convex_hull = Vec::new();
+    
+    let (min_p, max_p) = min_max_points_xdist(&points);
+    let line = Line::calc_line(&min_p.unwrap(), &max_p.unwrap());
+    let f_point = point_farthest_from_line(&line, points);
+    Some(&convex_hull)
 }
 
-fn calc_line(p1: &Point, p2: &Point) -> Line{
-    let m = (p1.y - p2.y) as f32 / (p1.x - p2.x) as f32;
-    let b = p1.y as f32 - (m * p1.x as f32);
-    Line{m, b}
-}
+fn main() -> Result<(), Error> {
+    let args: Vec<String> = env::args().collect();
 
-// fn is_above_line(p: Point) -> PointLocation {
+    if args.len() < 2 {
+        println!("Usage: {} point_file.txt", &args[0]);
+    } else {
+        let file_path = &args[1];
+        let file_in = File::open(file_path)?;
 
-// }
-
-fn main() {
-    let p1 = Point{x: 1, y: 5};
-    let p2 = Point{x: 2, y: 2};
-
-    let l  = calc_line(&p1, &p2);
-
-    println!("The line of points {} and {} is y = {}x {} {}", p1, p2, l.m, if l.b < 0.0{"-"}else{"+"}, if l.b < 0.0 {-l.b} else {l.b});
+        let points =  parse_file(&file_in);
+        println!("{:?}", quickhull(&points));
+    }
+    Ok(())
 }
