@@ -100,6 +100,23 @@ function update_point_area(){
     point_outputarea.elt.readOnly = true;
 }
 
+function circle_points(){
+    input_points = point_inputarea.elt.value;
+    input_points = input_points.split("\n");
+    if(input_points.length > 1){
+        noFill();
+        strokeWeight(1);
+        input_points.forEach(element => {
+            let p_split = element.split(" ");
+            let p = new Point(int(p_split[0]), int(p_split[1]));
+            ellipse(p.x, p.y, 7, 7);
+        });
+        strokeWeight(4);
+    }
+    point_inputarea.elt.value = "";
+    displayPointEvent();
+}
+
 function setup() {
     canvas = createCanvas(windowWidth-window_width_offset, windowHeight-window_height_offset);
     canvas.parent('main-canvas');
@@ -108,11 +125,9 @@ function setup() {
     generate_button.parent('buttons');
     generate_button.mousePressed(generate_points_btnevent);
 
-    let user_in_button = createButton('Use Own Points').id("functional-button");
-    user_in_button.parent('buttons');
-
     let display_convex_hull_button = createButton('Display Convex Hull').id('functional-button');
     display_convex_hull_button.parent('buttons');
+    display_convex_hull_button.mousePressed(circle_points);
 
     display_point_chkbx = createCheckbox('Show Point Numbers', true);
     display_point_chkbx.changed(displayPointEvent);
