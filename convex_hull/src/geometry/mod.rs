@@ -12,8 +12,6 @@ impl fmt::Display for Point {
     }
 }
 
-
-
 #[derive(Debug)]
 pub struct Line {
     m: f64,
@@ -36,6 +34,12 @@ impl Line {
 
 impl fmt::Display for Line {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}x {} {}", self.m, if self.b > 0.0 {"+"} else {"-"}, self.b.abs())
+        write!(
+            f,
+            "{}x {} {}",
+            self.m,
+            if self.b > 0.0 { "+" } else { "-" },
+            self.b.abs()
+        )
     }
 }

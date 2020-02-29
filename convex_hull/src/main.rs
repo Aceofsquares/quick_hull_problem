@@ -1,28 +1,27 @@
 use std::env;
 use std::fs::File;
-use std::io::{BufReader, BufRead, Error};
+use std::io::{BufRead, BufReader, Error};
 
 mod geometry;
 
-use geometry::{Point, Line};
+use geometry::{Line, Point};
 
 fn parse_file(f: &File) -> Vec<Point> {
-    let points: Vec<Point> = Vec::new();
-
     let buffered = BufReader::new(f);
 
-    buffered.lines().map(
-        |line| {
+    buffered
+        .lines()
+        .map(|line| {
             let line = line.unwrap();
-            let split: Vec<&str> = line.split(" ").collect();
+            let split: Vec<&str> = line.split(' ').collect();
             let x = split[0].parse::<f64>().unwrap();
             let y = split[1].parse::<f64>().unwrap();
-            Point{x, y}
-        }
-    ).collect()
+            Point { x, y }
+        })
+        .collect()
 }
 
-fn min_max_points_xdist(points: &Vec<Point>) -> (Option<Point>, Option<Point>) {
+fn min_max_points_xdist(points: &[Point]) -> (Option<Point>, Option<Point>) {
     let mut min_point = &points[0];
     let mut max_point = &points[0];
 
@@ -39,7 +38,7 @@ fn min_max_points_xdist(points: &Vec<Point>) -> (Option<Point>, Option<Point>) {
     (Some(*min_point), Some(*max_point))
 }
 
-fn point_farthest_from_line(line: &Line, points: &Vec<Point>) -> Option<Point> {
+fn point_farthest_from_line(line: &Line, points: &[Point]) -> Point {
     let mut farthest_point = &points[0];
     let mut current_max_distance = line.rel_pos_of_point(farthest_point).abs();
     for point in points {
@@ -50,21 +49,30 @@ fn point_farthest_from_line(line: &Line, points: &Vec<Point>) -> Option<Point> {
         }
     }
 
-    Some(*farthest_point)
+    *farthest_point
 }
 
-fn quickhull(points: &Vec<Point>) -> Option<&Vec<Point>> {
+fn quickhull(points: &[Point]) -> Option<Vec<Point>> {
     if points.len() < 2 {
         return None;
-    } else if points.len() == 2{
-        return Some(points);
+    } else if points.len() == 2 {
+        return Some(points.to_vec());
     }
     let convex_hull = Vec::new();
-    
+
     let (min_p, max_p) = min_max_points_xdist(&points);
     let line = Line::calc_line(&min_p.unwrap(), &max_p.unwrap());
-    let f_point = point_farthest_from_line(&line, points);
-    Some(&convex_hull)
+
+    let points_above = points.iter().filter(|p| line.rel_pos_of_point(p) < 0.0);
+    let points_below = points.iter().filter(|p| line.rel_pos_of_point(p) > 0.0);
+
+    println!("PA -> {:?}", points_above.collect::<Vec<&Point>>());
+    println!("PB -> {:?}", points_below.collect::<Vec<&Point>>());
+
+    // let f_point = point_farthest_from_line(&line, points);
+    println!("{}", line);
+    println!("{} {}", min_p.unwrap(), max_p.unwrap());
+    Some(convex_hull)
 }
 
 fn main() -> Result<(), Error> {
@@ -76,7 +84,7 @@ fn main() -> Result<(), Error> {
         let file_path = &args[1];
         let file_in = File::open(file_path)?;
 
-        let points =  parse_file(&file_in);
+        let points = parse_file(&file_in);
         println!("{:?}", quickhull(&points));
     }
     Ok(())
