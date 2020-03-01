@@ -1,4 +1,4 @@
-let default_number_of_points = 50;
+let default_number_of_points = 100;
 let display_point_text_chkbx;
 let point_outputarea;
 let point_inputarea;
@@ -160,7 +160,7 @@ function generate_points(count, minx, miny, maxx, maxy, x_offset=0, y_offset=0) 
         result.push(new Point(x, y));
     }
 
-    return result.sort(function(a, b){return a.x - b.x;});
+    return result;
 }
 
 function update_output_area() {
@@ -179,7 +179,7 @@ function setup() {
     generate_button.parent('buttons');
     generate_button.mousePressed((function () {
         point_inputarea.elt.value = "";
-        points = generate_points(default_number_of_points, -width/4, -height/4, width/4, height/4, width/2, (height/2)-75);
+        points = generate_points(default_number_of_points, -width/3, -height/3, width/3, height/3, width/2, (height/2)-75);
         update_output_area();
         points_connected = false;
     }));
