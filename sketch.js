@@ -11,10 +11,12 @@ const window_height_offset = 500;
 
 let points_connected = false;
 
+let sx, sy;
+
 class Point{
     constructor(X, Y){
-        this.x = X;
-        this.y = Y;
+        this.x = int(X);
+        this.y = int(Y);
     }
 
     to_string() {
@@ -62,29 +64,89 @@ function draw_inputarea_points_text() {
     }
 }
 
-function circle_point(point_) {
-    noFill();
-    strokeWeight(1);
-    stroke(255, 0, 0);
-    ellipse(point_.x, point_.y, 10, 10);
-    stroke(0);
-    fill(0);
+function make_lines(point_set) {
+    var leftmost_point = null;
+    var rightmost_point = null;
+
+    let input_points_arr = [];
+    let input_points = point_inputarea.elt.value.split("\n");
+    input_points = input_points.forEach(p => {
+        if(p != "") {
+            p = p.split(" ");
+            input_points_arr.push(new Point(int(p[0]), int(p[1])));
+        }
+    });
+
+    input_points_arr.forEach(p => {
+        if(leftmost_point == null || leftmost_point.x > p.x) {
+            leftmost_point = p;
+        }
+
+        if(rightmost_point == null || rightmost_point.x < p.x) {
+            rightmost_point = p;
+        }
+    });
+    let m = (leftmost_point.y - rightmost_point.y) / (leftmost_point.x - rightmost_point.x);
+    let b = leftmost_point.y - (m * leftmost_point.x);
+
+    let above = [];
+    let below = [];
+
+    input_points_arr.forEach(p => {
+        let y = m * p.x + b;
+        if((p.x != leftmost_point.x && p.y != leftmost_point.y) || (p.x != rightmost_point.x && p.y != rightmost_point.y)){
+            if(y < p.y) {
+                above.push(p);
+            }else if(y > p.y) {
+                below.push(p);
+            }
+        }
+    });
+
+    above = above.sort(function(p1, p2){return p1.x - p2.x;});
+    below = below.sort(function(p1, p2){return p2.x - p1.x;});
+
+    let polygon = [leftmost_point];
+    polygon = polygon.concat(above);
+    polygon.push(rightmost_point);
+    polygon = polygon.concat(below);
+
+    let last_point = null;
+    let first_point = null;
+    polygon.forEach(p => {
+        if(last_point == null) {
+            last_point = p;
+            first_point = p;
+        } else {
+            line(p.x, p.y, last_point.x, last_point.y);
+            last_point = p;
+        }
+    });
+    line(last_point.x, last_point.y, first_point.x, first_point.y);
 }
 
-//Draws circles for now.
+
+function compare(a, b) {
+    return a - b;
+}
+
 function connect_points() {
     let input_points = point_inputarea.elt.value;
     let did_work = false;
     input_points = input_points.split("\n");
+
+    let connected_points = [];
     if(input_points.length >= 1){
         input_points.forEach(v => {
             if(v != "") {
+                strokeWeight(1);
                 let p_split = v.split(" ");
                 let p = new Point(p_split[0], p_split[1]);
-                circle_point(p);
+                connected_points.push(p);
                 did_work = true;
             }
         });
+        make_lines(connected_points);
     }
     return did_work;
 }
@@ -98,7 +160,7 @@ function generate_points(count, minx, miny, maxx, maxy, x_offset=0, y_offset=0) 
         result.push(new Point(x, y));
     }
 
-    return result;
+    return result.sort(function(a, b){return a.x - b.x;});
 }
 
 function update_output_area() {
@@ -148,14 +210,20 @@ function setup() {
 
 function draw() {
     background(255);
-    if(points_connected) {
-        connect_points();
-    }
+    strokeWeight(1);
+    line(0, 0, width, 0);
+    line(0, height, 0, 0);
+    line(0, height, width, height);
+    line(width, 0, width, height);
+
     if(display_point_text_chkbx.value() == 1) {
         draw_points();
     } else if(display_point_text_chkbx.value() == 2) {
         draw_all_points_text();
     } else if(display_point_text_chkbx.value() == 3) {
         draw_inputarea_points_text();
+    }
+    if(points_connected) {
+        connect_points();
     }
 }
