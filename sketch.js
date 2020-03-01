@@ -1,4 +1,4 @@
-let default_number_of_points = 100;
+let default_number_of_points = 50;
 let display_point_text_chkbx;
 let point_outputarea;
 let point_inputarea;
@@ -73,9 +73,16 @@ function make_lines(point_set) {
     input_points = input_points.forEach(p => {
         if(p != "") {
             p = p.split(" ");
+            if(p.length < 2 || p.length > 2){
+                return;
+            }
             input_points_arr.push(new Point(int(p[0]), int(p[1])));
         }
     });
+    
+    if(input_points_arr.length == 0){
+        return;
+    }
 
     input_points_arr.forEach(p => {
         if(leftmost_point == null || leftmost_point.x > p.x) {
