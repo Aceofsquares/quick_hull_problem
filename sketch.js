@@ -7,11 +7,9 @@ let canvas;
 let points = [];
 
 const window_width_offset = 0;
-const window_height_offset = 500;
+const window_height_offset = 400;
 
 let points_connected = false;
-
-let sx, sy;
 
 class Point{
     constructor(X, Y){
@@ -182,16 +180,24 @@ function setup() {
     canvas = createCanvas(windowWidth-window_width_offset, windowHeight-window_height_offset);
     canvas.parent('main-canvas');
 
+    let user_in = createInput(str(default_number_of_points));
+    user_in.parent('buttons');
+
     let generate_button = createButton('Generate Points').id("functional-button");
     generate_button.parent('buttons');
     generate_button.mousePressed((function () {
         point_inputarea.elt.value = "";
-        points = generate_points(default_number_of_points, -width/3, -height/3, width/3, height/3, width/2, (height/2)-75);
+        let num_of_points = int(user_in.elt.value);
+        if(num_of_points <= 2) {
+            alert("Number of points must be greater than 2.  Setting to default: " + default_number_of_points);
+            num_of_points = default_number_of_points;
+        }
+        points = generate_points(num_of_points, width*.1, -height/3, width*.9, height/3+75, 0, (height/2)-(height*.1));
         update_output_area();
         points_connected = false;
     }));
 
-    let connect_points_btn = createButton('Connect Input Points').id('functional-button');
+    let connect_points_btn = createButton('Make Polygon').id('functional-button');
     connect_points_btn.parent('buttons');
     connect_points_btn.mousePressed((function () {
         points_connected = connect_points();
@@ -206,8 +212,9 @@ function setup() {
     display_point_text_chkbx.parent('buttons');
     display_point_text_chkbx.value('1');
 
-    createDiv("<p><b>Points Output</b></p>").parent('point-io').id('p-out').html();
+    createDiv("<p><b>Generated Points</b></p>").parent('point-io').id('p-out').html();
     point_outputarea = createElement('textarea');
+    point_outputarea.attribute("readonly", "readonly");
     point_outputarea.parent('p-out');
 
     createDiv("<p><b>Points input</b></p>").parent('point-io').id('p-in').html();
