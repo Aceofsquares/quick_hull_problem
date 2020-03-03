@@ -27,7 +27,7 @@ class Point{
 }
 
 function draw_points() {
-    strokeWeight(4);
+    strokeWeight(5);
     if(points.length != 0) {
         points.forEach(p =>{
             point(p.x, p.y);
