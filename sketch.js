@@ -24,6 +24,14 @@ class Point{
     display() {
         point(this.x, this.y);
     }
+
+    equals(other) {
+        return this.x === other.x && this.y === other.y;
+    }
+
+    distance(other) {
+        return Math.sqrt(Math.pow(other.x - this.x, 2) + Math.pow(other.y - this.y, 2));
+    }
 }
 
 function draw_points() {
@@ -176,9 +184,56 @@ function update_output_area() {
     point_outputarea.elt.value = result;
 }
 
+function doMouseClicked() {
+    let mPoint = new Point(mouseX, mouseY);
+    let input_area = [];
+
+    if(point_inputarea.elt.value != "") {
+        point_inputarea.elt.value.split("\n").forEach(line => {
+            line = line.split(" ");
+            if(line.length == 2) {
+                let x = int(line[0]);
+                let y = int(line[1]);
+                input_area.push(new Point(x, y));
+            }
+        });
+    }
+
+    point_inputarea.elt.value = "";
+
+    let should_add = true;
+    let newPoint = null;
+    points.forEach(p => {
+        if(p.distance(mPoint) <= 3){
+            newPoint = p;
+        }
+    });
+    if(newPoint != null) {
+        if(input_area.length == 0){
+            point_inputarea.elt.value = newPoint.to_string() + "\n";
+        } else {
+            input_area.forEach(p => {
+                if(p.equals(newPoint)){
+                    should_add = false;
+                } else {
+                    point_inputarea.elt.value += p.to_string() + "\n";
+                }
+            });
+            if(should_add){
+                point_inputarea.elt.value += newPoint.to_string() + "\n";
+            }
+        }
+    } else {
+        input_area.forEach(p => {
+            point_inputarea.elt.value += p.to_string() + "\n";
+        });
+    }
+}
+
 function setup() {
     canvas = createCanvas(windowWidth-window_width_offset, windowHeight-window_height_offset);
     canvas.parent('main-canvas');
+    canvas.mouseClicked(doMouseClicked);
 
     let user_in = createInput(str(default_number_of_points));
     user_in.parent('buttons');
